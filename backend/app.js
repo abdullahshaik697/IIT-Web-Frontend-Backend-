@@ -13,7 +13,8 @@ app.use('/uploads', express.static('uploads'));
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('Could not connect to MongoDB:', err));
+  .catch(err => console.error('Could not connect to MongoDB:', err)
+);
 
 // Routes
 const adminRoutes = require('./routes/adminRoutes');
