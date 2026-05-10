@@ -1,78 +1,38 @@
 "use client";
 import "../../index.css"
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Courses() {
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const courses = [
-    {
-      id: 1,
-      title: 'CIT',
-      shortTitle: 'Computer Information Technology',
-      description:
-        'Comprehensive IT fundamentals including programming, databases, and system administration.',
-      image: '/images/CIT.png',
-    },
-    {
-      id: 2,
-      title: 'Office Automation',
-      shortTitle: 'MS Office & Business Tools',
-      description:
-        'Master MS Office suite including Word, Excel, PowerPoint, and advanced data management.',
-      image: '/images/office.png',
-    },
-    {
-      id: 3,
-      title: 'AI',
-      shortTitle: 'Artificial Intelligence',
-      description:
-        'Explore machine learning, deep learning, neural networks, and AI applications.',
-      image: '/images/ai1.png',
-    },
-    {
-      id: 4,
-      title: 'Networking',
-      shortTitle: 'Network Administration',
-      description:
-        'Learn network design, configuration, troubleshooting, and security protocols.',
-      image: '/images/net.png',
-    },
-    {
-      id: 5,
-      title: 'Cyber Security',
-      shortTitle: 'Information Security',
-      description:
-        'Understand cybersecurity threats, defense mechanisms, and ethical hacking.',
-      image: '/images/cyber.png',
-    },
-    {
-      id: 6,
-      title: 'Web Development',
-      shortTitle: 'Frontend & Backend',
-      description:
-        'Build responsive websites using HTML, CSS, JavaScript, React, Node.js, and databases.',
-      image: '/images/mern.png',
-    },
-    {
-      id: 7,
-      title: 'Mobile App Dev',
-      shortTitle: 'iOS & Android Development',
-      description:
-        'Create native and cross-platform mobile applications for iOS and Android.',
-      image: '/images/app.png',
-    },
-  ];
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
-  // 🔥 DEBUG: Check if button click is working
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/user/courses");
+      const data = await response.json();
+      if (data.success) {
+        setCourses(data.courses);
+      }
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDetailsClick = (course) => {
-    console.log("Details clicked for:", course.title); // Console mein check karo
     setSelectedCourse(course);
   };
 
   return (
-    <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-16 bg-gradient-to-b from-gray-50 to-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Heading */}
@@ -87,162 +47,121 @@ export default function Courses() {
 
         {/* Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {loading ? (
+            <div className="col-span-full text-center py-20 text-gray-500">Loading courses...</div>
+          ) : courses.length === 0 ? (
+            <div className="col-span-full text-center py-20 text-gray-500">No courses available at the moment.</div>
+          ) : (
+            courses.map((course) => (
+              <div
+                key={course._id}
+                className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition duration-500 hover:-translate-y-3 flex flex-col"
+              >
+                {/* TOP BADGE */}
+                <span className="absolute top-3 left-3 z-10 bg-green-600 text-white text-xs px-3 py-1 rounded-full shadow-md pointer-events-none">
+                  Popular
+                </span>
 
-          {courses.map((course) => (
-            <div
-              key={course.id}
-              className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition duration-500 hover:-translate-y-3"
-            >
+                {/* IMAGE */}
+                <div className="relative h-48 overflow-hidden pointer-events-none bg-gray-100">
+                  {course.image ? (
+                    <img
+                      src={`http://localhost:5000/${course.image}`}
+                      alt={course.title}
+                      className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                      No Image
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                </div>
 
-              {/* TOP BADGE */}
-              <span className="absolute top-3 left-3 z-10 bg-green-600 text-white text-xs px-3 py-1 rounded-full shadow-md pointer-events-none">
-                Popular
-              </span>
+                {/* CONTENT */}
+                <div className="p-6 relative z-10 flex flex-col flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-green-600 transition mb-2">
+                    {course.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 line-clamp-2 mb-4 flex-1">
+                    {course.description}
+                  </p>
 
-              {/* IMAGE */}
-              <div className="relative h-40 sm:h-44 md:h-48 overflow-hidden pointer-events-none">
-                <img
-                  src={course.image}
-                  alt={course.title}
-                  className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
-                />
-
-                {/* Dark overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-
-                {/* Hover text on image */}
-              
-              </div>
-
-              {/* CONTENT */}
-              <div className="p-6 relative z-10">
-                {/* 👆 z-10 diya taaki buttons glow border ke upar rahein */}
-
-                <h3 className="text-lg font-bold text-gray-900 group-hover:text-green-600 transition pointer-events-none">
-                  {course.title}
-                </h3>
-
-                {/* BUTTONS */}
-                <div className="flex gap-2 mt-4">
-
-                  <button 
-                    type="button"
-                    className="relative z-20 flex-1 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold transition duration-300 hover:bg-green-700 hover:shadow-lg cursor-pointer"
-                  >
-                    Enroll
-                  </button>
-
-                  {/* FIXED DETAILS BUTTON */}
-                  <button 
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation(); 
-                      handleDetailsClick(course);
-                    }}
-                    className="relative z-20 flex-1 py-2 rounded-lg border border-green-600 text-green-600 text-sm font-semibold transition duration-300 hover:bg-green-600 hover:text-white cursor-pointer"
-                  >
-                    Details
-                  </button>
-
+                  {/* BUTTONS */}
+                  <div className="flex gap-2 mt-auto">
+                    <button 
+                      onClick={() => navigate('/admission')}
+                      className="flex-1 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold transition duration-300 hover:bg-green-700 hover:shadow-lg"
+                    >
+                      Enroll
+                    </button>
+                    <button 
+                      onClick={() => handleDetailsClick(course)}
+                      className="flex-1 py-2 rounded-lg border border-green-600 text-green-600 text-sm font-semibold transition duration-300 hover:bg-green-600 hover:text-white"
+                    >
+                      Details
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              {/* Glow border effect */}
-              <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-green-400/40 transition duration-500 pointer-events-none z-0"></div>
-              
-
-            </div>
-          ))}
-
+            ))
+          )}
         </div>
       </div>
 
       {/* POPUP MODAL */}
-      
       {selectedCourse && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={() => {
-            console.log("Overlay clicked - closing");
-            setSelectedCourse(null);
-          }}
-        >
-          
-          {/* Overlay Background */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-
-          {/* Popup Content */}
-          <div 
-            className="relative bg-white max-w-lg w-full overflow-hidden shadow-2xl slide-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            {/* Close Button */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedCourse(null)}></div>
+          <div className="relative bg-white max-w-lg w-full rounded-2xl overflow-hidden shadow-2xl slide-in">
             <button
-              onClick={() => {
-                console.log("Close button clicked");
-                setSelectedCourse(null);
-              }}
-              className="absolute top-3 right-3 z-20 bg-transparent hover:bg-white text-gray-700 p-2 rounded-full shadow-md transition cursor-pointer"
+              onClick={() => setSelectedCourse(null)}
+              className="absolute top-3 right-3 z-20 bg-white/80 hover:bg-white text-gray-700 p-2 rounded-full shadow-md transition"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
 
-            {/* Popup Image */}
-            <div className="relative h-48 sm:h-56 overflow-hidden">
-              <img
-                src={selectedCourse.image}
-                alt={selectedCourse.title}
-                className="w-full h-full object-cover"
-              />
+            <div className="relative h-56 overflow-hidden">
+              {selectedCourse.image ? (
+                <img
+                  src={`http://localhost:5000/${selectedCourse.image}`}
+                  alt={selectedCourse.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300">No Image</div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-              
-              {/* Title on image */}
               <div className="absolute bottom-4 left-6">
-                <h3 className="text-2xl font-bold text-white">
-                  {selectedCourse.title}
-                </h3>
+                <h3 className="text-2xl font-bold text-white">{selectedCourse.title}</h3>
               </div>
             </div>
 
-            {/* Popup Content */}
             <div className="p-6">
-              
-              {/* Short Title */}
-              <p className="text-sm text-green-600 font-semibold mb-3">
-                {selectedCourse.shortTitle}
-              </p>
-
-              {/* Description */}
               <p className="text-gray-600 text-sm leading-relaxed mb-6">
                 {selectedCourse.description}
               </p>
-
-              {/* Buttons */}
               <div className="flex gap-3">
-                <button className="flex-1 py-3 rounded-lg bg-green-600 text-white font-semibold transition duration-300 hover:bg-green-700 hover:shadow-lg cursor-pointer">
+                <button 
+                  onClick={() => { setSelectedCourse(null); navigate('/admission'); }}
+                  className="flex-1 py-3 rounded-lg bg-green-600 text-white font-semibold transition duration-300 hover:bg-green-700"
+                >
                   Enroll Now
                 </button>
-                
                 <button 
                   onClick={() => setSelectedCourse(null)}
-                  className="flex-1 py-3 rounded-lg border border-gray-300 text-gray-700 font-semibold transition duration-300 hover:bg-gray-100 cursor-pointer"
+                  className="flex-1 py-3 rounded-lg border border-gray-300 text-gray-700 font-semibold transition duration-300 hover:bg-gray-100"
                 >
                   Close
                 </button>
               </div>
-
             </div>
-
           </div>
         </div>
       )}
-
-    
-
     </section>
   );
 }

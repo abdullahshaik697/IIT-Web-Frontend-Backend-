@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AdmissionForm({ id = 'admission' }) {
   const [formData, setFormData] = useState({
@@ -10,10 +10,28 @@ export default function AdmissionForm({ id = 'admission' }) {
     address: "",
     whatsapp: "",
     course: "",
-    timing: "",
     message: "",
     photo: null,
   });
+
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/user/courses");
+      const data = await response.json();
+      if (data.success) {
+        setCourses(data.courses);
+      }
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -24,10 +42,48 @@ export default function AdmissionForm({ id = 'admission' }) {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    alert("Form Submitted Successfully ✅");
+    setLoading(true);
+
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => {
+      data.append(key, formData[key]);
+    });
+
+    try {
+      const response = await fetch("http://localhost:5000/api/user/admission", {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Application Submitted Successfully ✅");
+        // Reset form
+        setFormData({
+          name: "",
+          fatherName: "",
+          dob: "",
+          qualification: "",
+          cnic: "",
+          address: "",
+          whatsapp: "",
+          course: "",
+          timing: "",
+          message: "",
+          photo: null,
+        });
+      } else {
+        alert("Failed to submit application: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("An error occurred while submitting the form. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -82,27 +138,14 @@ export default function AdmissionForm({ id = 'admission' }) {
             value={formData.course}
             onChange={handleChange}
             required
-            className="w-full p-3 text-black border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 hover:border-green-400"
+            className="md:col-span-2 w-full p-3 text-black border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 hover:border-green-400"
           >
             <option value="">Select Course</option>
-            <option value="CIT">CIT</option>
-            <option value="AI">Artificial Intelligence</option>
-            <option value="Cyber">Cyber Security</option>
-            <option value="MERN">MERN Stack</option>
-          </select>
-
-          {/* Timing */}
-          <select
-            name="timing"
-            value={formData.timing}
-            onChange={handleChange}
-            required
-            className="w-full p-3 text-black border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 hover:border-green-400"
-          >
-            <option value="">Select Timing</option>
-            <option value="Morning">Morning</option>
-            <option value="Afternoon">Afternoon</option>
-            <option value="Evening">Evening</option>
+            {courses.map((course) => (
+              <option key={course._id} value={course.title}>
+                {course.title}
+              </option>
+            ))}
           </select>
 
           {/* Address */}
@@ -143,9 +186,10 @@ export default function AdmissionForm({ id = 'admission' }) {
           {/* Submit */}
           <button
             onClick={handleSubmit}
-            className="md:col-span-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold transition transform hover:scale-[1.02]"
+            disabled={loading}
+            className={`md:col-span-2 ${loading ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'} text-white py-3 rounded-xl font-semibold transition transform hover:scale-[1.02]`}
           >
-            Submit Application
+            {loading ? "Submitting..." : "Submit Application"}
           </button>
 
         </form>

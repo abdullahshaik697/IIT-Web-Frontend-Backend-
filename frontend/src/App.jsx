@@ -12,10 +12,25 @@ import  Event from '../src/user/pages/Event';
 import NotFound from '../src/user/pages/NotFound';
 import './index.css';
 
+// Admin Imports
+import AdminLayout from './admin/layouts/MainLayout';
+import DashboardPage from './admin/pages/DashboardPage';
+import AdmissionPage from './admin/pages/AdmissionPage';
+import EnrolledPage from './admin/pages/EnrolledPage';
+import CertificateGeneratorPage from './admin/pages/CertificateGeneratorPage';
+import FeeChallanGenerator from './admin/pages/FeeChallanGenerator';
+import VerifyFeePage from './admin/pages/VerifyFeePage';
+import AdminLogin from './admin/pages/AdminLogin';
+import AdminCoursesPage from './admin/pages/AdminCoursesPage';
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Admin Login Route (No Layout) */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        {/* User Routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home/>} />
           <Route path="/about" element={<AboutPage />} />
@@ -27,6 +42,17 @@ function App() {
           <Route path="/donate" element={<DonateUs/>} />
           <Route path="/events" element={<Event/>} />
           <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="courses" element={<AdminCoursesPage />} />
+          <Route path="admissions" element={<AdmissionPage />} />
+          <Route path="enrolled" element={<EnrolledPage />} />
+          <Route path="certificates" element={<CertificateGeneratorPage />} />
+          <Route path="fees" element={<FeeChallanGenerator />} />
+          <Route path="verify-fee" element={<VerifyFeePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
