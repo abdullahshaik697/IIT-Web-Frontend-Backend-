@@ -39,7 +39,7 @@ const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
           {/* Logo Section */}
           <div className="p-6 border-b border-gray-800 flex items-center gap-3">
             <img src="/images/logo.png" alt="IIT Logo" className="w-10 h-10 object-contain" />
-            <h1 className="text-xl font-bold text-green-500">IIT PORTAL</h1>
+            <h1 className="text-xl font-bold text-green-500">IIT STUDENT PORTAL</h1>
           </div>
 
           {/* Navigation */}

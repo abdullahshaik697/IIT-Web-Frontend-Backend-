@@ -9,6 +9,8 @@ const dashboardController = require('../controllers/adminControllers/dashboardCo
 const admissionController = require('../controllers/adminControllers/admissionController');
 const courseController = require('../controllers/adminControllers/courseController');
 const enrolledController = require('../controllers/adminControllers/enrolledController');
+const certificateController = require('../controllers/adminControllers/certificateController');
+const feeController = require('../controllers/adminControllers/feeController');
 
 const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_PASSWORD = "111222";
@@ -73,5 +75,16 @@ router.get('/courses/:courseName/students', courseController.getCourseEnrolledSt
 // Enrolled Students
 router.get('/enrolled', enrolledController.getEnrolledStudents);
 router.put('/enrolled/:id', enrolledController.updateEnrolledStudent);
+
+// Certificate Routes
+router.get('/certificates', certificateController.getCertificates);
+router.post('/certificates/generate', certificateController.generateCertificate);
+router.delete('/certificates/:id', certificateController.deleteCertificate);
+
+// Fee Routes
+router.get('/fees', feeController.getAllFees);
+router.post('/fees/generate', feeController.generateChallan);
+router.put('/fees/:id/status', feeController.updateFeeStatus);
+router.delete('/fees/:id', feeController.deleteChallan);
 
 module.exports = router;
