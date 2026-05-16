@@ -9,6 +9,7 @@ export default function AdmissionForm({ id = 'admission' }) {
     cnic: "",
     address: "",
     whatsapp: "",
+    email: "",
     course: "",
     message: "",
     photo: null,
@@ -70,6 +71,7 @@ export default function AdmissionForm({ id = 'admission' }) {
           cnic: "",
           address: "",
           whatsapp: "",
+          email: "",
           course: "",
           timing: "",
           message: "",
@@ -104,6 +106,7 @@ export default function AdmissionForm({ id = 'admission' }) {
             { name: "qualification", placeholder: "Qualification" },
             { name: "cnic", placeholder: "CNIC Number" },
             { name: "whatsapp", placeholder: "WhatsApp Number" },
+            { name: "email", placeholder: "Email Address" },
           ].map((field, i) => (
             <input
               key={i}

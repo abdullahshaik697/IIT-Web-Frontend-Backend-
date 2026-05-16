@@ -23,6 +23,15 @@ import VerifyFeePage from './admin/pages/VerifyFeePage';
 import AdminLogin from './admin/pages/AdminLogin';
 import AdminCoursesPage from './admin/pages/AdminCoursesPage';
 
+// User Portal Imports (Updated Paths)
+import UserPortalLayout from './userPortal/layouts/UserPortalLayout';
+import UserLogin from './userPortal/pages/UserLogin';
+import UserDashboard from './userPortal/pages/Dashboard';
+import MyCourses from './userPortal/pages/MyCourses';
+import VerifyCertificate from './userPortal/pages/VerifyCertificate';
+import VerifyFees from './userPortal/pages/VerifyFees';
+import PersonalDetails from './userPortal/pages/PersonalDetails';
+
 function App() {
   return (
     <BrowserRouter>
@@ -53,6 +62,16 @@ function App() {
           <Route path="certificates" element={<CertificateGeneratorPage />} />
           <Route path="fees" element={<FeeChallanGenerator />} />
           <Route path="verify-fee" element={<VerifyFeePage />} />
+        </Route>
+
+        {/* User Portal Routes */}
+        <Route path="/userportal/login" element={<UserLogin />} />
+        <Route path="/userportal" element={<UserPortalLayout />}>
+          <Route path="dashboard" element={<UserDashboard />} />
+          <Route path="courses" element={<MyCourses />} />
+          <Route path="verify-certificate" element={<VerifyCertificate />} />
+          <Route path="verify-fees" element={<VerifyFees />} />
+          <Route path="settings" element={<PersonalDetails />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Edit2, XCircle, Search, Eye, Save } from 'lucide-react';
+import { Edit2, XCircle, Search, Eye, Save, CheckCircle, Shield } from 'lucide-react';
 
 const AdmissionPage = () => {
   const [admissions, setAdmissions] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Details/Edit Modal State
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
+
+  // Enrollment Modal State
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [enrollData, setEnrollData] = useState({ email: '', password: '' });
 
   useEffect(() => {
     fetchAdmissions();
@@ -62,6 +68,45 @@ const AdmissionPage = () => {
     }
   };
 
+  // Open the Enrollment Modal
+  const handleEnrollClick = (student) => {
+    setSelectedStudent(student);
+    setEnrollData({
+      email: student.email || '', // Extract email from admission form record
+      password: '' // Admin will provide password
+    });
+    setShowEnrollModal(true);
+  };
+
+  // Submit Enrollment with Credentials
+  const submitEnrollment = async (e) => {
+    e.preventDefault();
+    if (!enrollData.email || !enrollData.password) {
+        alert("Please provide both email and password.");
+        return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/students/${selectedStudent._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            email: enrollData.email,
+            password: enrollData.password, // Plain text as requested
+            status: 'Enrolled'
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`Student ${selectedStudent.name} enrolled successfully!`);
+        setShowEnrollModal(false);
+        fetchAdmissions();
+      }
+    } catch (error) {
+      console.error('Error enrolling student:', error);
+    }
+  };
+
   const handleEditClick = (student) => {
     setSelectedStudent(student);
     setEditForm({ ...student });
@@ -95,7 +140,7 @@ const AdmissionPage = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-roboto">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">New Admissions</h1>
@@ -118,6 +163,7 @@ const AdmissionPage = () => {
           <table className="w-full text-left">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">S.No</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-600">Student Info</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-600">Course</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-600">Contact</th>
@@ -128,15 +174,16 @@ const AdmissionPage = () => {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">Loading admissions...</td>
+                  <td colSpan="6" className="px-6 py-10 text-center text-gray-500">Loading admissions...</td>
                 </tr>
               ) : filteredAdmissions.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">No new admissions found.</td>
+                  <td colSpan="6" className="px-6 py-10 text-center text-gray-500">No new admissions found.</td>
                 </tr>
               ) : (
-                filteredAdmissions.map((student) => (
+                filteredAdmissions.map((student, index) => (
                   <tr key={student._id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 text-sm text-gray-600 font-medium">{index + 1}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden border">
@@ -150,7 +197,7 @@ const AdmissionPage = () => {
                         </div>
                         <div>
                           <p className="font-semibold text-gray-800">{student.name}</p>
-                          <p className="text-xs text-gray-500">CNIC: {student.cnic}</p>
+                          <p className="text-xs text-gray-500">{student.email || 'No Email'}</p>
                         </div>
                       </div>
                     </td>
@@ -176,10 +223,10 @@ const AdmissionPage = () => {
                           <Edit2 size={18} />
                         </button>
                         <button 
-                          onClick={() => handleStatusChange(student._id, 'Enrolled')}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition"
+                          onClick={() => handleEnrollClick(student)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1"
                         >
-                          Enroll
+                          <CheckCircle size={14} /> Enroll
                         </button>
                       </div>
                     </td>
@@ -190,6 +237,60 @@ const AdmissionPage = () => {
           </table>
         </div>
       </div>
+
+      {/* Enrollment Credentials Modal */}
+      {showEnrollModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl animate-in zoom-in duration-200">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <Shield className="text-green-600" size={24} /> Complete Enrollment
+                    </h2>
+                    <button onClick={() => setShowEnrollModal(false)} className="text-gray-400 hover:text-gray-600">
+                        <XCircle size={24} />
+                    </button>
+                </div>
+
+                <p className="text-sm text-gray-500 mb-6">
+                    Provide portal access credentials for <strong>{selectedStudent.name}</strong>.
+                </p>
+
+                <form onSubmit={submitEnrollment} className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Student Email</label>
+                        <input 
+                            type="email"
+                            required
+                            value={enrollData.email}
+                            onChange={(e) => setEnrollData({...enrollData, email: e.target.value})}
+                            className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none font-bold text-gray-700"
+                            placeholder="student@example.com"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1">This email was extracted from the admission form.</p>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Set Portal Password</label>
+                        <input 
+                            type="text"
+                            required
+                            value={enrollData.password}
+                            onChange={(e) => setEnrollData({...enrollData, password: e.target.value})}
+                            className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none font-bold text-gray-700"
+                            placeholder="Enter password"
+                        />
+                    </div>
+
+                    <button 
+                        type="submit"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold transition shadow-lg shadow-green-600/20 mt-4"
+                    >
+                        Enroll Student & Grant Access
+                    </button>
+                </form>
+            </div>
+        </div>
+      )}
 
       {/* Details/Edit Modal */}
       {showModal && selectedStudent && (
@@ -230,6 +331,7 @@ const AdmissionPage = () => {
                     {[
                       { label: 'Full Name', name: 'name', type: 'text' },
                       { label: 'Father Name', name: 'fatherName', type: 'text' },
+                      { label: 'Email', name: 'email', type: 'email' },
                       { label: 'CNIC', name: 'cnic', type: 'number' },
                       { label: 'WhatsApp', name: 'whatsapp', type: 'number' },
                       { label: 'Qualification', name: 'qualification', type: 'text' },
@@ -244,7 +346,7 @@ const AdmissionPage = () => {
                             className="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none"
                           />
                         ) : (
-                          <p className="font-semibold text-gray-800">{selectedStudent[field.name]}</p>
+                          <p className="font-semibold text-gray-800">{selectedStudent[field.name] || 'N/A'}</p>
                         )}
                       </div>
                     ))}
@@ -293,7 +395,7 @@ const AdmissionPage = () => {
                     ) : (
                       <button 
                         type="button"
-                        onClick={() => handleStatusChange(selectedStudent._id, 'Enrolled')}
+                        onClick={() => handleEnrollClick(selectedStudent)}
                         className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-green-500/30"
                       >
                         Enroll

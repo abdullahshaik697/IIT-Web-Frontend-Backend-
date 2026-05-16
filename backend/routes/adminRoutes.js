@@ -14,16 +14,28 @@ const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_PASSWORD = "111222";
 const JWT_SECRET = process.env.JWT_SECRET;
 
+const Counter = require('../model/Counter');
+
 // Multer for Course Images
-const storage = multer.diskStorage({
+const courseStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/courses/');
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+  filename: async (req, file, cb) => {
+    try {
+      const counter = await Counter.findOneAndUpdate(
+        { id: 'course_pic' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      const ext = path.extname(file.originalname);
+      cb(null, `CRS-${counter.seq}${ext}`);
+    } catch (error) {
+      cb(error);
+    }
   }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage: courseStorage });
 
 // Admin Login
 router.post('/login', (req, res) => {

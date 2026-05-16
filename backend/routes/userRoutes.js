@@ -8,17 +8,29 @@ const path = require('path');
 // 0. Get Courses (for dropdown)
 router.get('/courses', courseController.getCourses);
 
-// Multer Storage Configuration
-const storage = multer.diskStorage({
+const Counter = require('../model/Counter');
+
+// Multer Storage Configuration for Students
+const studentStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, 'uploads/students/');
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+  filename: async (req, file, cb) => {
+    try {
+      const counter = await Counter.findOneAndUpdate(
+        { id: 'student_pic' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      const ext = path.extname(file.originalname);
+      cb(null, `PP-ST-${counter.seq}${ext}`);
+    } catch (error) {
+      cb(error);
+    }
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: studentStorage });
 
 // 1. Admission Form Submission
 router.post('/admission', upload.single('photo'), userController.applyAdmission);

@@ -5,6 +5,14 @@ const studentSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
+  email: {
+    type: String,
+    unique: true,
+    sparse: true // Allows existing students without email to stay
+  },
+  password: {
+    type: String
+  },
   fatherName: { 
     type: String, 
     required: true 

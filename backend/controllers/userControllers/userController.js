@@ -11,6 +11,7 @@ const applyAdmission = async (req, res) => {
       cnic,
       address,
       whatsapp,
+      email,
       course,
       timing,
       message
@@ -24,6 +25,7 @@ const applyAdmission = async (req, res) => {
       cnic,
       address,
       whatsapp,
+      email,
       course,
       message,
       photo: req.file ? req.file.path : null

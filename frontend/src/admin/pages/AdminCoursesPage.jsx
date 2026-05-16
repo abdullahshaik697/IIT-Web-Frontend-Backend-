@@ -105,49 +105,78 @@ const AdminCoursesPage = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
-          <p>Loading courses...</p>
-        ) : courses.map((course) => (
-          <div key={course._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-            <div className="h-48 bg-gray-100 relative">
-              {course.image ? (
-                <img src={`http://localhost:5000/${course.image}`} alt={course.title} className="h-full w-full object-cover" />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">S.No</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Course</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Description</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="px-6 py-10 text-center text-gray-500">Loading courses...</td>
+                </tr>
+              ) : courses.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="px-6 py-10 text-center text-gray-500">No courses found.</td>
+                </tr>
               ) : (
-                <div className="h-full w-full flex items-center justify-center text-gray-300">
-                  <ImageIcon size={48} />
-                </div>
+                courses.map((course, index) => (
+                  <tr key={course._id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 text-sm text-gray-600 font-medium">{index + 1}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden border flex-shrink-0">
+                          {course.image ? (
+                            <img src={`http://localhost:5000/${course.image}`} alt={course.title} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-gray-300">
+                              <ImageIcon size={20} />
+                            </div>
+                          )}
+                        </div>
+                        <span className="font-bold text-gray-800">{course.title}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm text-gray-600 line-clamp-2 max-w-md">{course.description}</p>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button 
+                          onClick={() => viewEnrolled(course.title)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Enrolled Students"
+                        >
+                          <Users size={18} />
+                        </button>
+                        <button 
+                          onClick={() => { setFormData(course); setIsEditing(true); setShowModal(true); }}
+                          className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition"
+                          title="Edit Course"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(course._id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                          title="Delete Course"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
-            </div>
-            <div className="p-5 flex-1 flex flex-col">
-              <h3 className="text-xl font-bold text-gray-800 mb-2">{course.title}</h3>
-              <p className="text-gray-600 text-sm line-clamp-3 mb-4">{course.description}</p>
-              
-              <div className="mt-auto flex justify-between items-center pt-4 border-t border-gray-50">
-                <button 
-                  onClick={() => viewEnrolled(course.title)}
-                  className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition flex items-center gap-1 text-sm font-medium"
-                >
-                  <Users size={18} /> Enrolled
-                </button>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => { setFormData(course); setIsEditing(true); setShowModal(true); }}
-                    className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(course._id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Add/Edit Modal */}

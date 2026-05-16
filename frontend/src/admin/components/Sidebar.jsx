@@ -32,8 +32,9 @@ const Sidebar = () => {
 
   return (
     <div className="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
-      <div className="p-6 border-b border-gray-800">
-        <h1 className="text-xl font-bold text-green-500">IIT ADMIN</h1>
+      <div className="p-6 border-b border-gray-800 flex items-center gap-3">
+        <img src="/images/logo.png" alt="IIT Logo" className="w-10 h-10 object-contain" />
+        <h1 className="text-xl font-bold text-green-500">IIT ADMIN PANEL</h1>
       </div>
       
       <nav className="flex-1 p-4 space-y-2">

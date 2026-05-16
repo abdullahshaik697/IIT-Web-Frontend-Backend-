@@ -22,9 +22,11 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
+const userPortalRoutes = require('./routes/userPortalRoutes');
 
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/user-portal', userPortalRoutes);
 
 // Test route
 app.get('/', (req, res) => {

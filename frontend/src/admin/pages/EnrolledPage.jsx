@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Edit2, XCircle, Search, Eye, Save } from 'lucide-react';
+import { Edit2, XCircle, Search, Eye, Save, Key, Mail, EyeOff } from 'lucide-react';
 
 const EnrolledPage = () => {
   const [students, setStudents] = useState([]);
@@ -10,6 +10,7 @@ const EnrolledPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetchEnrolledStudents();
@@ -84,7 +85,7 @@ const EnrolledPage = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-roboto">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Enrolled Students</h1>
@@ -107,9 +108,10 @@ const EnrolledPage = () => {
           <table className="w-full text-left">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">S.No</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-600">Student Info</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Portal Credentials</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-600">Course</th>
-                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Contact</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-600 text-center">Status</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-600 text-right">Actions</th>
               </tr>
@@ -117,15 +119,16 @@ const EnrolledPage = () => {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">Loading students...</td>
+                  <td colSpan="6" className="px-6 py-10 text-center text-gray-500">Loading students...</td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">No students found.</td>
+                  <td colSpan="6" className="px-6 py-10 text-center text-gray-500">No students found.</td>
                 </tr>
               ) : (
-                filteredStudents.map((student) => (
+                filteredStudents.map((student, index) => (
                   <tr key={student._id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 text-sm text-gray-600 font-medium">{index + 1}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden border">
@@ -144,9 +147,20 @@ const EnrolledPage = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                           <Mail size={12} className="text-gray-400" />
+                           <span className="font-medium">{student.email || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                           <Key size={12} className="text-gray-400" />
+                           <span className="font-bold">{student.password || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
                       <p className="text-sm font-medium text-gray-700">{student.course}</p>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{student.whatsapp}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-3 py-1 text-xs font-bold rounded-full ${getStatusColor(student.status)}`}>
                         {student.status}
@@ -155,7 +169,7 @@ const EnrolledPage = () => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button 
-                          onClick={() => { setSelectedStudent(student); setIsEditing(false); setShowModal(true); }}
+                          onClick={() => { setSelectedStudent(student); setIsEditing(false); setShowModal(true); setShowPassword(false); }}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                           title="View Details"
                         >
@@ -164,7 +178,7 @@ const EnrolledPage = () => {
                         <button 
                           onClick={() => handleEditClick(student)}
                           className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition"
-                          title="Edit Status/Details"
+                          title="Edit Student"
                         >
                           <Edit2 size={18} />
                         </button>
@@ -201,8 +215,53 @@ const EnrolledPage = () => {
                       <div className="h-full w-full flex items-center justify-center text-gray-300 text-5xl">👤</div>
                     )}
                   </div>
+                  
+                  {/* Portal Credentials Section */}
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        <Key size={14} /> Portal Credentials
+                     </h4>
+                     <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase">Email</p>
+                        {isEditing ? (
+                           <input 
+                              type="email"
+                              value={editForm.email || ''}
+                              onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                              className="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none mt-1"
+                           />
+                        ) : (
+                           <p className="text-sm font-bold text-gray-800">{selectedStudent.email || 'Not Set'}</p>
+                        )}
+                     </div>
+                     <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase">Password</p>
+                        {isEditing ? (
+                           <input 
+                              type="text"
+                              value={editForm.password || ''}
+                              onChange={(e) => setEditForm({...editForm, password: e.target.value})}
+                              className="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none mt-1"
+                           />
+                        ) : (
+                           <div className="flex items-center justify-between">
+                              <p className="text-sm font-bold text-gray-800">
+                                 {showPassword ? selectedStudent.password : '••••••••'}
+                              </p>
+                              <button 
+                                 type="button"
+                                 onClick={() => setShowPassword(!showPassword)}
+                                 className="text-gray-400 hover:text-green-600 transition"
+                              >
+                                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                              </button>
+                           </div>
+                        )}
+                     </div>
+                  </div>
+
                   <div>
-                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Status</p>
+                    <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Current Status</p>
                     {isEditing ? (
                       <select 
                         value={editForm.status || ''}
@@ -273,7 +332,13 @@ const EnrolledPage = () => {
                         <Save size={20} /> Save Changes
                       </button>
                     ) : (
-                      <p className="text-xs text-gray-400 text-center italic">Use the edit button to update status or details</p>
+                      <button 
+                        type="button"
+                        onClick={() => handleEditClick(selectedStudent)}
+                        className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-yellow-500/30"
+                      >
+                        Edit Information
+                      </button>
                     )}
                   </div>
                 </div>
