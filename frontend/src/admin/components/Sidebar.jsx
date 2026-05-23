@@ -7,7 +7,8 @@ import {
   FileBadge, 
   ReceiptText, 
   Search, 
-  LogOut 
+  LogOut,
+  ClipboardList
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -22,6 +23,7 @@ const Sidebar = () => {
     { path: '/admin/certificates', icon: FileBadge, label: 'Certificates' },
     { path: '/admin/fees', icon: ReceiptText, label: 'Fee Challan' },
     { path: '/admin/verify-fee', icon: Search, label: 'Verify Fee' },
+    { path: '/admin/assign-quiz', icon: ClipboardList, label: 'Assign Quiz' },
   ];
 
   const handleLogout = () => {

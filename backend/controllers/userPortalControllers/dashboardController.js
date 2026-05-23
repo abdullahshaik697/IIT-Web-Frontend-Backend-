@@ -37,6 +37,11 @@ const getDashboardStats = async (req, res) => {
             { courseName: student.course, progress: 45 }
         ];
 
+        const feeSchedule = fees.map(f => ({
+            month: f.month,
+            status: f.status
+        }));
+
         res.status(200).json({
             success: true,
             stats: {
@@ -46,7 +51,8 @@ const getDashboardStats = async (req, res) => {
                 totalRemaining,
                 certificatesEarned,
                 notifications,
-                courseProgress
+                courseProgress,
+                feeSchedule
             }
         });
 

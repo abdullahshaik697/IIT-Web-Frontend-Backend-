@@ -3,11 +3,10 @@ import {
   BookOpen, 
   CreditCard, 
   Award, 
-  Bell, 
-  TrendingUp, 
-  CheckCircle2, 
-  Clock, 
-  AlertCircle 
+  AlertCircle,
+  Download,
+  Calendar,
+  CheckCircle2
 } from 'lucide-react';
 
 const UserDashboard = () => {
@@ -46,18 +45,18 @@ const UserDashboard = () => {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 font-outfit">
+    <div className="space-y-8 animate-in fade-in duration-500 font-roboto">
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
             Welcome, <span className="text-green-600">{data.studentName}</span> 👋
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Check your course progress and financial status.</p>
+          <p className="text-gray-500 text-sm mt-1">Check your course details and financial status.</p>
         </div>
       </div>
 
-      {/* Stats Grid - Matching Admin Card Style */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
@@ -74,67 +73,87 @@ const UserDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Course Progress Section */}
+        {/* Left Column: Courses & Actions */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Active Courses */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-800 mb-6">Course Completion</h3>
-            
-            <div className="space-y-8">
-              {data.courseProgress.map((cp, idx) => (
-                <div key={idx} className="space-y-3">
-                   <div className="flex justify-between items-center">
-                      <span className="font-bold text-sm text-gray-700">{cp.courseName}</span>
-                      <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full">{cp.progress}% Complete</span>
-                   </div>
-                   <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-green-500 rounded-full transition-all duration-1000 ease-out"
-                        style={{ width: `${cp.progress}%` }}
-                      ></div>
-                   </div>
-                   <div className="flex items-center gap-4 text-[11px] font-bold text-gray-400">
-                      <span className="flex items-center gap-1"><Clock size={12}/> Time remaining: 4 Months</span>
-                      <span className="flex items-center gap-1"><CheckCircle2 size={12}/> Progress: On Track</span>
-                   </div>
-                </div>
-              ))}
+            <h3 className="text-lg font-bold text-gray-800 mb-6">Active Courses</h3>
+            <div className="space-y-4">
+              {data.courseProgress && data.courseProgress.length > 0 ? (
+                data.courseProgress.map((cp, idx) => (
+                  <div key={idx} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+                         <BookOpen size={20} />
+                      </div>
+                      <div>
+                        <span className="font-bold text-sm text-gray-800">{cp.courseName}</span>
+                        <p className="text-xs text-gray-500 mt-0.5">Currently Enrolled</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500 font-medium">No active courses found.</p>
+              )}
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <button className="p-5 bg-green-600 rounded-2xl text-white font-bold text-sm flex items-center justify-between hover:bg-green-700 transition shadow-sm">
-                <span>Download Fee Challan</span>
-                <CreditCard size={18} />
-             </button>
-             <button className="p-5 bg-gray-900 rounded-2xl text-white font-bold text-sm flex items-center justify-between hover:bg-black transition shadow-sm">
-                <span>Verification Request</span>
-                <AlertCircle size={18} />
-             </button>
-          </div>
+
         </div>
 
-        {/* Notifications Sidebar */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-800 mb-6">Notifications</h3>
+        {/* Right Column: Fee Summary */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+          <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <CreditCard className="text-green-600" size={20} /> Fee Overview
+          </h3>
           
           <div className="space-y-5">
-            {data.notifications.map((notif) => (
-              <div key={notif.id} className="flex gap-4 p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer group">
-                <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center ${notif.type === 'fee' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                   {notif.type === 'fee' ? <CreditCard size={16} /> : <TrendingUp size={16} />}
+             {/* Total Paid */}
+             <div className="p-5 bg-green-50 rounded-xl border border-green-100">
+                <div className="flex items-center justify-between mb-1">
+                   <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Total Paid</p>
+                   <CheckCircle2 className="text-green-500" size={16} />
                 </div>
-                <div>
-                   <p className="text-xs font-bold text-gray-800 leading-tight group-hover:text-green-600 transition">{notif.message}</p>
-                   <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-wider">{notif.date}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+                <p className="text-2xl font-bold text-green-700">Rs. {data.totalPaid}</p>
+             </div>
 
-          <button className="w-full mt-6 py-3 border border-gray-100 bg-gray-50 rounded-xl text-gray-500 font-bold text-xs hover:bg-gray-100 transition">
-             View All Activity
-          </button>
+             {/* Total Remaining */}
+             <div className="p-5 bg-red-50 rounded-xl border border-red-100">
+                <div className="flex items-center justify-between mb-1">
+                   <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Total Remaining</p>
+                   <AlertCircle className="text-red-500" size={16} />
+                </div>
+                <p className="text-2xl font-bold text-red-700">Rs. {data.totalRemaining}</p>
+                {data.totalRemaining > 0 && (
+                   <p className="text-[10px] text-red-500 mt-2 font-bold uppercase">Please clear your dues</p>
+                )}
+             </div>
+
+             {/* Monthly Fee Schedule */}
+             <div className="pt-4 border-t border-gray-100">
+                <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                   <Calendar size={16} className="text-gray-400" /> Monthly Schedule
+                </h4>
+                
+                <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                   {data.feeSchedule && data.feeSchedule.length > 0 ? (
+                      data.feeSchedule.map((fee, idx) => (
+                         <div key={idx} className="flex justify-between items-center p-3 rounded-lg border border-gray-100 bg-gray-50">
+                            <span className="text-sm font-bold text-gray-700">{fee.month}</span>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md ${
+                               fee.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                               {fee.status}
+                            </span>
+                         </div>
+                      ))
+                   ) : (
+                      <p className="text-xs text-gray-500 font-medium text-center">No fee records found.</p>
+                   )}
+                </div>
+             </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { jsPDF } from 'jspdf';
 import { 
   Receipt, 
   Search, 
@@ -29,11 +30,177 @@ const FeeChallanGenerator = () => {
   });
 
   const [selectedStudentInfo, setSelectedStudentInfo] = useState(null);
+  const [studentSearchQuery, setStudentSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   useEffect(() => {
     fetchStudents();
     fetchFees();
   }, []);
+
+  const handleDownloadPDF = (fee) => {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = 210;
+    const pageHeight = 297;
+
+    // Outer border (thin green line)
+    doc.setDrawColor(34, 197, 94);
+    doc.setLineWidth(0.5);
+    doc.rect(10, 10, pageWidth - 20, pageHeight - 20);
+
+    // Inner border (thick green line)
+    doc.setDrawColor(22, 163, 74);
+    doc.setLineWidth(1.5);
+    doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
+
+    // Header / Brand Name
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(22, 163, 74);
+    doc.text("INSTITUTE OF INFORMATION TECHNOLOGY (IIT)", 20, 25);
+
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(107, 114, 128);
+    doc.text("Professional IT Training Institute & Development Center", 20, 30);
+
+    // Divider
+    doc.setDrawColor(229, 231, 235);
+    doc.setLineWidth(0.5);
+    doc.line(20, 35, pageWidth - 20, 35);
+
+    // Challan Title
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(17, 24, 39);
+    doc.text("FEE CHALLAN / RECEIPT", pageWidth / 2, 50, { align: 'center' });
+
+    // Challan Info Grid (box)
+    doc.setDrawColor(219, 234, 254);
+    doc.setFillColor(243, 248, 255);
+    doc.rect(20, 60, pageWidth - 40, 45, 'FD');
+
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(75, 85, 99);
+
+    // Challan No.
+    doc.text("CHALLAN NO:", 25, 70);
+    doc.setFont('Courier', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(22, 163, 74);
+    doc.text(fee.challanNo, 60, 70);
+
+    // Month / Year
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(75, 85, 99);
+    doc.text("BILLING MONTH:", 25, 80);
+    doc.setFont('Helvetica', 'bold');
+    doc.text(fee.month, 60, 80);
+
+    // Date Generated
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(75, 85, 99);
+    doc.text("ISSUE DATE:", 25, 90);
+    const issueDateFormatted = fee.paidDate ? new Date(fee.paidDate).toLocaleDateString() : new Date().toLocaleDateString();
+    doc.setFont('Helvetica', 'normal');
+    doc.text(issueDateFormatted, 60, 90);
+
+    // Status
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(75, 85, 99);
+    doc.text("PAYMENT STATUS:", pageWidth - 90, 70);
+    doc.setFont('Helvetica', 'bold');
+    if (fee.status === 'Paid') {
+      doc.setTextColor(22, 163, 74); // green
+    } else {
+      doc.setTextColor(220, 38, 38); // red
+    }
+    doc.text(fee.status.toUpperCase(), pageWidth - 50, 70);
+
+    // Course
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(75, 85, 99);
+    doc.text("ENROLLED COURSE:", pageWidth - 90, 80);
+    doc.setFont('Helvetica', 'normal');
+    doc.setTextColor(17, 24, 39);
+    doc.text(fee.courseName, pageWidth - 50, 80);
+
+    // Student Info Header
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(22, 163, 74);
+    doc.text("STUDENT DETAILS", 20, 120);
+
+    // Student Details Table-like Layout
+    doc.setDrawColor(229, 231, 235);
+    doc.line(20, 125, pageWidth - 20, 125);
+
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(107, 114, 128);
+    doc.text("Student Name:", 25, 135);
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(17, 24, 39);
+    doc.text(fee.studentName, 60, 135);
+
+    doc.line(20, 142, pageWidth - 20, 142);
+
+    // Fees details table
+    doc.setFillColor(249, 250, 251);
+    doc.rect(20, 160, pageWidth - 40, 12, 'F');
+    
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(75, 85, 99);
+    doc.text("Description", 25, 168);
+    doc.text("Amount (Rs.)", pageWidth - 50, 168);
+
+    doc.line(20, 172, pageWidth - 20, 172);
+
+    doc.setFont('Helvetica', 'normal');
+    doc.setTextColor(17, 24, 39);
+    doc.text(`Tuition Fees for the month of ${fee.month}`, 25, 185);
+    doc.setFont('Helvetica', 'bold');
+    doc.text(`Rs. ${fee.amount}`, pageWidth - 50, 185);
+
+    doc.line(20, 195, pageWidth - 20, 195);
+
+    // Total
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(22, 163, 74);
+    doc.text("TOTAL AMOUNT:", 25, 208);
+    doc.text(`Rs. ${fee.amount}`, pageWidth - 50, 208);
+
+    // Instructions
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(17, 24, 39);
+    doc.text("Terms & Payment Rules:", 20, 235);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(107, 114, 128);
+    doc.text("1. Fees must be submitted before the 10th of every month.", 20, 242);
+    doc.text("2. Please keep this receipt safe as proof of payment.", 20, 247);
+    doc.text("3. Fees once paid are strictly non-refundable and non-transferable.", 20, 252);
+
+    // Signatures
+    doc.setDrawColor(156, 163, 175);
+    doc.line(25, 275, 75, 275);
+    doc.text("Student Signature", 37, 280);
+
+    doc.line(pageWidth - 75, 275, pageWidth - 25, 275);
+    doc.text("Authorized Signature", pageWidth - 65, 280);
+
+    doc.save(`FeeChallan_${fee.challanNo}.pdf`);
+  };
 
   const fetchStudents = async () => {
     try {
@@ -159,7 +326,18 @@ const FeeChallanGenerator = () => {
             <p className="text-gray-500 text-sm mt-1 ml-11">Manage student fee collections and generate monthly challans.</p>
           </div>
           <button 
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setStudentSearchQuery('');
+              setShowSearchResults(false);
+              setSelectedStudentInfo(null);
+              setFormData({
+                studentId: '',
+                amount: '',
+                month: new Date().toISOString().slice(0, 7),
+                status: 'Unpaid'
+              });
+              setShowForm(true);
+            }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition shadow-lg shadow-blue-600/20 active:scale-95"
           >
             <Plus size={18} /> Generate New Challan
@@ -270,7 +448,11 @@ const FeeChallanGenerator = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                          <div className="flex justify-end gap-2">
-                            <button className="p-2.5 text-gray-500 hover:bg-gray-100 rounded-xl transition" title="Print Receipt">
+                            <button 
+                              onClick={() => handleDownloadPDF(fee)}
+                              className="p-2.5 text-gray-500 hover:bg-gray-100 rounded-xl transition" 
+                              title="Print Receipt"
+                            >
                                <Printer size={18} />
                             </button>
                             <button 
@@ -312,19 +494,65 @@ const FeeChallanGenerator = () => {
 
               <form onSubmit={handleSubmit} className="space-y-8">
                  <div className="space-y-6">
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Select Student</label>
-                       <select 
-                         required
-                         value={formData.studentId}
-                         onChange={(e) => handleStudentSelect(e.target.value)}
-                         className="w-full p-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none font-bold text-gray-700 transition"
-                       >
-                          <option value="">Choose a student...</option>
-                          {students.map(s => (
-                             <option key={s._id} value={s._id}>{s.name} ({s.course})</option>
-                          ))}
-                       </select>
+                    <div className="space-y-2 relative">
+                       <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Search & Select Student</label>
+                       <div className="relative">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                          <input 
+                            type="text"
+                            placeholder="Search student by Name, CNIC, or Course..."
+                            value={studentSearchQuery}
+                            onChange={(e) => {
+                              setStudentSearchQuery(e.target.value);
+                              setShowSearchResults(true);
+                            }}
+                            onFocus={() => setShowSearchResults(true)}
+                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none font-bold text-gray-700 transition"
+                          />
+                       </div>
+
+                       {/* Search Results Dropdown List */}
+                       {showSearchResults && studentSearchQuery.trim() !== '' && (
+                          <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-100 rounded-2xl shadow-xl max-h-60 overflow-y-auto z-50 divide-y divide-gray-50">
+                             {students
+                               .filter(s => 
+                                  (s.name?.toLowerCase() || "").includes(studentSearchQuery.toLowerCase()) ||
+                                  (s.course?.toLowerCase() || "").includes(studentSearchQuery.toLowerCase()) ||
+                                  String(s.cnic).includes(studentSearchQuery)
+                               )
+                               .slice(0, 10)
+                               .map(s => (
+                                  <div 
+                                    key={s._id}
+                                    onClick={() => {
+                                       handleStudentSelect(s._id);
+                                       setStudentSearchQuery(`${s.name} (${s.course})`);
+                                       setShowSearchResults(false);
+                                    }}
+                                    className="p-4 hover:bg-blue-50/50 cursor-pointer flex justify-between items-center transition"
+                                  >
+                                     <div>
+                                        <p className="text-sm font-bold text-gray-800">{s.name}</p>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase">{s.course}</p>
+                                     </div>
+                                     <div className="text-right">
+                                        <p className="text-xs font-mono font-bold text-gray-500">CNIC: {s.cnic}</p>
+                                     </div>
+                                  </div>
+                               ))
+                             }
+                             {students.filter(s => 
+                                (s.name?.toLowerCase() || "").includes(studentSearchQuery.toLowerCase()) ||
+                                (s.course?.toLowerCase() || "").includes(studentSearchQuery.toLowerCase()) ||
+                                String(s.cnic).includes(studentSearchQuery)
+                             ).length === 0 && (
+                                <div className="p-4 text-center text-xs text-gray-400 font-medium">
+                                   No student matches your search.
+                                </div>
+                             )}
+                          </div>
+                       )}
+                       <input type="hidden" required value={formData.studentId} />
                     </div>
 
                     {selectedStudentInfo && (

@@ -105,18 +105,7 @@ const MyCourses = () => {
                     {course.description}
                   </p>
 
-                  <div className="space-y-2 mb-6">
-                    <div className="flex justify-between items-center text-[11px] font-bold text-gray-400">
-                       <span className="uppercase tracking-wider">Completion Status</span>
-                       <span className="text-green-600 font-bold">{course.progress}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-green-500 rounded-full transition-all duration-1000"
-                        style={{ width: `${course.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
+
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-50">

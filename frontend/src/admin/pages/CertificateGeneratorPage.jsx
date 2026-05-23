@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { jsPDF } from 'jspdf';
 import { 
   Award, 
   Search, 
@@ -33,6 +34,135 @@ const CertificateGeneratorPage = () => {
     fetchStudents();
     fetchCertificates();
   }, []);
+
+  const handleDownloadPDF = (cert) => {
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = 297;
+    const pageHeight = 210;
+
+    // --- DRAW DECORATIVE BORDERS ---
+    // Outer border (thin green line)
+    doc.setDrawColor(34, 197, 94);
+    doc.setLineWidth(1);
+    doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+
+    // Inner border (thick green line)
+    doc.setDrawColor(22, 163, 74);
+    doc.setLineWidth(2);
+    doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
+
+    // Corner elegant line decorations
+    doc.setLineWidth(0.5);
+    doc.line(12, 12, 25, 12);
+    doc.line(12, 12, 12, 25);
+
+    doc.line(pageWidth - 12, 12, pageWidth - 25, 12);
+    doc.line(pageWidth - 12, 12, pageWidth - 12, 25);
+
+    doc.line(12, pageHeight - 12, 25, pageHeight - 12);
+    doc.line(12, pageHeight - 12, 12, pageHeight - 25);
+
+    doc.line(pageWidth - 12, pageHeight - 12, pageWidth - 25, pageHeight - 12);
+    doc.line(pageWidth - 12, pageHeight - 12, pageWidth - 12, pageHeight - 25);
+
+    // --- TOP LEFT: Certificate No. ---
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(75, 85, 99);
+    doc.text(`Certificate No: ${cert.certificateNo}`, 16, 20);
+
+    // --- TOP RIGHT: Institute Name ---
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(22, 163, 74);
+    doc.text("Institute of Information Technology (IIT)", pageWidth - 16, 20, { align: 'right' });
+
+    // --- TITLE: Certificate of Completion ---
+    doc.setFont('Times', 'italic');
+    doc.setFontSize(36);
+    doc.setTextColor(17, 24, 39);
+    doc.text("Certificate of Completion", pageWidth / 2, 55, { align: 'center' });
+
+    // Elegant dividing line under title
+    doc.setDrawColor(22, 163, 74);
+    doc.setLineWidth(1);
+    doc.line(pageWidth / 2 - 40, 62, pageWidth / 2 + 40, 62);
+
+    // Subtitle
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(107, 114, 128);
+    doc.text("This is proudly presented to", pageWidth / 2, 75, { align: 'center' });
+
+    // --- CENTER: Student Name ---
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(28);
+    doc.setTextColor(22, 163, 74);
+    doc.text(cert.studentName, pageWidth / 2, 92, { align: 'center' });
+
+    // --- CENTER: Father's Name ---
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(14);
+    doc.setTextColor(75, 85, 99);
+    doc.text(`S/O / D/O  ${cert.fatherName}`, pageWidth / 2, 105, { align: 'center' });
+
+    // Description text
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(107, 114, 128);
+    doc.text(`for successfully completing the course of study in`, pageWidth / 2, 120, { align: 'center' });
+
+    // --- CENTER: Course Title ---
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(17, 24, 39);
+    doc.text(cert.course, pageWidth / 2, 134, { align: 'center' });
+
+    // --- CENTER: Duration (from - to) ---
+    doc.setFont('Helvetica', 'italic');
+    doc.setFontSize(12);
+    doc.setTextColor(75, 85, 99);
+    doc.text(`Duration: ${cert.duration}`, pageWidth / 2, 146, { align: 'center' });
+
+    // --- BOTTOM LEFT: Date of Issue ---
+    const issueDateFormatted = new Date(cert.issueDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(107, 114, 128);
+    doc.text(`Date of Issue: ${issueDateFormatted}`, 20, pageHeight - 30);
+    doc.line(20, pageHeight - 26, 80, pageHeight - 26);
+
+    // --- BOTTOM RIGHT: Signature & Name of Head ---
+    doc.setFont('Times', 'italic');
+    doc.setFontSize(16);
+    doc.setTextColor(22, 163, 74);
+    doc.text("Rafique Bhutto", pageWidth - 50, pageHeight - 32, { align: 'center' });
+
+    doc.setDrawColor(156, 163, 175);
+    doc.setLineWidth(0.5);
+    doc.line(pageWidth - 80, pageHeight - 26, pageWidth - 20, pageHeight - 26);
+
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(17, 24, 39);
+    doc.text("Rafique Bhutto", pageWidth - 50, pageHeight - 21, { align: 'center' });
+
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(107, 114, 128);
+    doc.text("Head of Institute", pageWidth - 50, pageHeight - 16, { align: 'center' });
+
+    doc.save(`Certificate_${cert.certificateNo}.pdf`);
+  };
 
   const fetchStudents = async () => {
     try {
@@ -192,9 +322,13 @@ const CertificateGeneratorPage = () => {
                     <td className="px-6 py-4 text-sm text-gray-500">{new Date(cert.issueDate).toLocaleDateString()}</td>
                     <td className="px-6 py-4 text-right">
                        <div className="flex justify-end gap-2">
-                          <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Print/Download">
-                             <Printer size={18} />
-                          </button>
+                           <button 
+                             onClick={() => handleDownloadPDF(cert)}
+                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" 
+                             title="Print/Download"
+                           >
+                              <Printer size={18} />
+                           </button>
                           <button 
                             onClick={() => handleDelete(cert._id)}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" 
@@ -274,13 +408,13 @@ const CertificateGeneratorPage = () => {
                     </div>
 
                     <div className="space-y-2">
-                       <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Duration</label>
+                       <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Duration (from - to)</label>
                        <input 
                          type="text" 
                          required
                          value={formData.duration}
                          onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                         placeholder="e.g. 3 Months"
+                         placeholder="e.g. Jan 2026 - Mar 2026"
                          className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-green-500 outline-none font-bold text-gray-700"
                        />
                     </div>

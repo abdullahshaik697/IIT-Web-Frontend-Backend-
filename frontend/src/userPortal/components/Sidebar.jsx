@@ -1,16 +1,43 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ShieldCheck, CreditCard, BookOpen, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, CreditCard, BookOpen, Settings, LogOut, ClipboardList } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const studentName = localStorage.getItem('studentName') || 'Student';
+  const [hasNewQuiz, setHasNewQuiz] = useState(false);
+
+  useEffect(() => {
+    const checkNewQuizzes = async () => {
+      const token = localStorage.getItem('studentToken');
+      if (!token) return;
+      try {
+        const response = await fetch('http://localhost:5000/api/user-portal/quizzes', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (data.success && Array.isArray(data.quizzes)) {
+          const unattempted = data.quizzes.some(q => !q.attempted);
+          setHasNewQuiz(unattempted);
+        }
+      } catch (error) {
+        console.error("Error checking new quizzes:", error);
+      }
+    };
+
+    checkNewQuizzes();
+    // Check every 30 seconds for new quizzes (live dot update)
+    const interval = setInterval(checkNewQuizzes, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const menuItems = [
     { title: 'Dashboard', path: '/userportal/dashboard', icon: LayoutDashboard },
     { title: 'My Courses', path: '/userportal/courses', icon: BookOpen },
-    { title: 'Verify Certificate', path: '/userportal/verify-certificate', icon: ShieldCheck },
-    { title: 'Verify Fees', path: '/userportal/verify-fees', icon: CreditCard },
+    { title: 'Attend Quiz', path: '/userportal/attend-quiz', icon: ClipboardList, badge: hasNewQuiz },
     { title: 'Personal Details', path: '/userportal/settings', icon: Settings },
   ];
 
@@ -60,7 +87,12 @@ const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
                   `}
                 >
                   <Icon size={20} />
-                  <span className="font-medium">{item.title}</span>
+                  <span className="font-medium flex items-center justify-between w-full">
+                    <span>{item.title}</span>
+                    {item.badge && (
+                      <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-md shadow-red-500/50 mr-1" />
+                    )}
+                  </span>
                 </Link>
               );
             })}

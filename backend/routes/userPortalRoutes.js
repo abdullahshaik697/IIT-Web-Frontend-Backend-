@@ -5,6 +5,7 @@ const authController = require('../controllers/userPortalControllers/authControl
 const dashboardController = require('../controllers/userPortalControllers/dashboardController');
 const coursesController = require('../controllers/userPortalControllers/coursesController');
 const verificationController = require('../controllers/userPortalControllers/verificationController');
+const quizController = require('../controllers/userPortalControllers/quizController');
 const { studentAuth } = require('../middleware/authMiddleware');
 const multer = require('multer');
 const path = require('path');
@@ -46,5 +47,9 @@ router.get('/verify-certificate/:certificateNo', verificationController.verifyCe
 router.get('/profile', studentAuth, settingsController.getProfile);
 router.put('/profile', studentAuth, upload.single('photo'), settingsController.updateProfile);
 router.put('/change-password', studentAuth, settingsController.changePassword);
+
+// Quiz Routes
+router.get('/quizzes', studentAuth, quizController.getAvailableQuizzes);
+router.post('/quizzes/attempt', studentAuth, quizController.attemptQuiz);
 
 module.exports = router;

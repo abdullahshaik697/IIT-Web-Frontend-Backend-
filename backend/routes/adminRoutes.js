@@ -11,6 +11,7 @@ const courseController = require('../controllers/adminControllers/courseControll
 const enrolledController = require('../controllers/adminControllers/enrolledController');
 const certificateController = require('../controllers/adminControllers/certificateController');
 const feeController = require('../controllers/adminControllers/feeController');
+const quizController = require('../controllers/adminControllers/quizController');
 
 const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_PASSWORD = "111222";
@@ -86,5 +87,11 @@ router.get('/fees', feeController.getAllFees);
 router.post('/fees/generate', feeController.generateChallan);
 router.put('/fees/:id/status', feeController.updateFeeStatus);
 router.delete('/fees/:id', feeController.deleteChallan);
+
+// Quiz Routes
+router.post('/quizzes', quizController.createQuiz);
+router.get('/quizzes', quizController.getAllQuizzes);
+router.get('/quizzes/attempts', quizController.getQuizAttempts);
+router.delete('/quizzes/:id', quizController.deleteQuiz);
 
 module.exports = router;
